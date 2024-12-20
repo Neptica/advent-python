@@ -1,4 +1,5 @@
 import math
+import time
 
 
 def read_file(filename):
@@ -43,6 +44,7 @@ def part_one(inp):
 
 def part_two(inp):
     # 101 wide 103 tall for input and 11, 7 for test
+    # found at 6516 using chinese remainder theorem alongside alignments at seconds 27 and 52 which I never would've got in a million years
     wide = 101
     tall = 103
     layout = []
@@ -51,18 +53,23 @@ def part_two(inp):
 
     user_in = ""
     while user_in != "exit":
-        user_in = input("Type anything to continue and 'exit' to quit: ")
-        temp = [[1 for _ in range(wide)] for _ in range(tall)]
+        if seconds > 6510:
+            user_in = input("Type anything to continue and 'exit' to quit: ")
+        temp = [[" " for _ in range(wide)] for _ in range(tall)]
         for parts in inp:
             x = (parts[0] + parts[2]) % wide
             y = (parts[1] + parts[3]) % tall
             parts[0] = x
             parts[1] = y
-            temp[y][x] = 0
+            temp[y][x] = "0"
         layout = temp
         seconds += 1
-        print(layout)
-        print(seconds)
+        if seconds > 6510:
+            for layer in layout:
+                for c in layer:
+                    print(c, end="")
+                print()
+            print(seconds)
 
     return 0
 
