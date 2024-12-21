@@ -18,6 +18,7 @@ def read_file(filename):
     return result, pos
 
 
+# S is always bottom left E is always top right, implement A* for speed
 def dfs(m, p, direction, visited, score):
     # Direction, NESW -> 0123
     if p in visited and visited[p] + 1000 <= score:
