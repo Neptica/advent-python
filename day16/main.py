@@ -18,54 +18,67 @@ def read_file(filename):
     return result, pos
 
 
+m, start = read_file("./input.txt")
+# test, test2, input
+# 7036, 11048, 85480
+BEST = 85480
+visited = [[float("infinity") for _ in range(len(m[0]))] for _ in range(len(m))]
+
+
 # S is always bottom left E is always top right, implement A* for speed
-def dfs(m, p, direction, visited, score):
-    # Direction, NESW -> 0123
-    if p in visited and visited[p] + 1000 <= score:
-        # 1000 incase orientation is different
+def dfs(p, direction, score):
+    weight = 1000
+    if visited[p[0]][p[1]] + weight <= score:
         return float("infinity")
 
     if m[p[0]][p[1]] == "E":
+        if score == BEST:
+            for i, _ in enumerate(m):
+                for j in range(len(m[0])):
+                    if visited[i][j] != float("infinity"):
+                        m[i][j] = "O"
         return score
 
-    visited[p] = score  # overwrite any high scores and find new paths
-    weight = 1000
+    prev = visited[p[0]][p[1]]
+    visited[p[0]][p[1]] = min(visited[p[0]][p[1]], score)
 
-    scores = []
-    if m[p[0] - 1][p[1]] != "#":
-        p1 = dfs(
-            m,
-            (p[0] - 1, p[1]),
-            0,
-            visited,
-            1 + abs((direction - 0) % 3) * weight + score,
-        )
-        scores.append(p1)
-    if m[p[0]][p[1] + 1] != "#":
-        p2 = dfs(
-            m, (p[0], p[1] + 1), 1, visited, 1 + abs(direction - 1) * weight + score
-        )
-        scores.append(p2)
-    if m[p[0] + 1][p[1]] != "#":
-        p3 = dfs(
-            m, (p[0] + 1, p[1]), 2, visited, 1 + abs(direction - 2) * weight + score
-        )
-        scores.append(p3)
-    if m[p[0]][p[1] - 1] != "#":
-        p4 = dfs(
-            m,
-            (p[0], p[1] - 1),
-            3,
-            visited,
-            1 + abs((direction - 3) % 3) * weight + score,
-        )
-        scores.append(p4)
+    r1, r2, r3, r4 = (
+        float("infinity"),
+        float("infinity"),
+        float("infinity"),
+        float("infinity"),
+    )
 
-    return min(scores)
+    if m[p[0] - 1][p[1]] != "#" and direction != 2:
+        penalty = weight if direction != 0 else 0
+        r1 = dfs((p[0] - 1, p[1]), 0, 1 + penalty + score)
+
+    if m[p[0]][p[1] + 1] != "#" and direction != 3:
+        penalty = weight if direction != 1 else 0
+        r2 = dfs((p[0], p[1] + 1), 1, 1 + penalty + score)
+
+    if m[p[0] + 1][p[1]] != "#" and direction != 0:
+        penalty = weight if direction != 2 else 0
+        r3 = dfs((p[0] + 1, p[1]), 2, 1 + penalty + score)
+
+    if m[p[0]][p[1] - 1] != "#" and direction != 1:
+        penalty = weight if direction != 3 else 0
+        r4 = dfs((p[0], p[1] - 1), 3, 1 + penalty + score)
+
+    visited[p[0]][p[1]] = prev
+
+    return min(r1, r2, r3, r4)
 
 
 if __name__ == "__main__":
-    layout, start = read_file("./input.txt")
-    # print(layout, start)
-    ans = dfs(layout, start, 1, {}, 0)
+    ans = dfs(start, 1, 0)
     print(ans)
+    ans2 = 1  # end tile is not counted
+    for line in m:
+        for c in line:
+            print(c, end="")
+            if c == "O":
+                ans2 += 1
+        print()
+
+    print(ans2)

@@ -1,2 +1,7 @@
-279740 < answer
-66500 < answer
+# 279740 < answer
+# 66500 < answer
+how did I get the above
+85480
+
+pt2
+480 < answer
