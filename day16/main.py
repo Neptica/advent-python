@@ -1,4 +1,5 @@
 import sys
+import time
 
 # Set a higher recursion limit
 
@@ -18,28 +19,27 @@ def read_file(filename):
     return result, pos
 
 
-m, start = read_file("./input.txt")
 # test, test2, input
 # 7036, 11048, 85480
-BEST = 85480
-visited = [[float("infinity") for _ in range(len(m[0]))] for _ in range(len(m))]
+BEST = 7036
 
 
 # S is always bottom left E is always top right, implement A* for speed
-def dfs(p, direction, score):
+def dfs(m, visited, current_track, p, direction, score, best):
     weight = 1000
-    if visited[p[0]][p[1]] + weight <= score:
+    if visited[p[0]][p[1]] + weight + 1 <= score:
         return float("infinity")
 
     if m[p[0]][p[1]] == "E":
-        if score == BEST:
+        if score == best:
             for i, _ in enumerate(m):
                 for j in range(len(m[0])):
-                    if visited[i][j] != float("infinity"):
+                    if current_track[i][j] != float("infinity"):
                         m[i][j] = "O"
         return score
 
-    prev = visited[p[0]][p[1]]
+    prev = current_track[p[0]][p[1]]
+    current_track[p[0]][p[1]] = min(current_track[p[0]][p[1]], score)
     visited[p[0]][p[1]] = min(visited[p[0]][p[1]], score)
 
     r1, r2, r3, r4 = (
@@ -51,30 +51,59 @@ def dfs(p, direction, score):
 
     if m[p[0] - 1][p[1]] != "#" and direction != 2:
         penalty = weight if direction != 0 else 0
-        r1 = dfs((p[0] - 1, p[1]), 0, 1 + penalty + score)
+        r1 = dfs(
+            m, visited, current_track, (p[0] - 1, p[1]), 0, 1 + penalty + score, best
+        )
 
     if m[p[0]][p[1] + 1] != "#" and direction != 3:
         penalty = weight if direction != 1 else 0
-        r2 = dfs((p[0], p[1] + 1), 1, 1 + penalty + score)
+        r2 = dfs(
+            m, visited, current_track, (p[0], p[1] + 1), 1, 1 + penalty + score, best
+        )
 
     if m[p[0] + 1][p[1]] != "#" and direction != 0:
         penalty = weight if direction != 2 else 0
-        r3 = dfs((p[0] + 1, p[1]), 2, 1 + penalty + score)
+        r3 = dfs(
+            m, visited, current_track, (p[0] + 1, p[1]), 2, 1 + penalty + score, best
+        )
 
     if m[p[0]][p[1] - 1] != "#" and direction != 1:
         penalty = weight if direction != 3 else 0
-        r4 = dfs((p[0], p[1] - 1), 3, 1 + penalty + score)
+        r4 = dfs(
+            m, visited, current_track, (p[0], p[1] - 1), 3, 1 + penalty + score, best
+        )
 
-    visited[p[0]][p[1]] = prev
+    current_track[p[0]][p[1]] = prev
 
     return min(r1, r2, r3, r4)
 
 
 if __name__ == "__main__":
-    ans = dfs(start, 1, 0)
+    layout, start = read_file("./input.txt")
+    repeat = [
+        [float("infinity") for _ in range(len(layout[0]))] for _ in range(len(layout))
+    ]
+    current = [
+        [float("infinity") for _ in range(len(layout[0]))] for _ in range(len(layout))
+    ]
+    time_start = time.time()
+    ans = dfs(layout, repeat, current, start, 1, 0, 0)
     print(ans)
+    print(time.time() - time_start)
+
+    # Part Two
+    repeat = [
+        [float("infinity") for _ in range(len(layout[0]))] for _ in range(len(layout))
+    ]
+    current = [
+        [float("infinity") for _ in range(len(layout[0]))] for _ in range(len(layout))
+    ]
+    time_start = time.time()
+    # 7036, 11048, 85480
+    dfs(layout, repeat, current, start, 1, 0, ans)
     ans2 = 1  # end tile is not counted
-    for line in m:
+    end = time.time() - time_start
+    for line in layout:
         for c in line:
             print(c, end="")
             if c == "O":
@@ -82,3 +111,4 @@ if __name__ == "__main__":
         print()
 
     print(ans2)
+    print(end)
