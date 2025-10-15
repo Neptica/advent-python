@@ -38,62 +38,22 @@ def possible(objective, patterns):
     return count
 
 
-@cache
-class Trie:
-    def __init__(self):
-        self.data = {}
-        self.blank_char = "BLANK"
-        self.nodes = 0
-        self.data[self.blank_char] = False
-
-    def addWord(self, word):
-        prev = self.data
-        for letter in word:
-            if letter not in prev:
-                prev[letter] = {self.blank_char: False}
-                self.nodes += 1
-            prev = prev[letter]
-        prev[self.blank_char] = True
+def twoi(s, w):
+    maxlen = len(max(s, key=len))
+    patterns = set(s)
 
     @cache
-    def pieceWise(self, linen):
+    def dfs(linen):
+        if linen == "":
+            return 1
         count = 0
-
-        @cache
-        def helper(linen, trie, previous_terminates):
-            nonlocal count
-            if len(linen) == 0:
-                if previous_terminates:
-                    count += 1
-                return
-
-            i = 0
-            while i < len(linen) and linen[i] in trie:
-                trie = trie[linen[i]]
-                pattern = linen[: i + 1]
-                if trie[self.blank_char]:
-                    helper(linen[i + 1 :], self.data, trie[self.blank_char])
-                i += 1
-
-        helper(linen, self.data, False)
+        for i in range(1, min(maxlen, len(linen)) + 1):
+            check = linen[:i]
+            if linen[:i] in patterns:
+                count += dfs(linen[i:])
         return count
 
-
-def twoi(s, w):
-    trie = Trie()
-    count = 0
-    for pattern in s:
-        count += len(pattern)
-        trie.addWord(pattern)
-    print(count, trie.nodes)
-
-    ans = 0
-    # print(trie.pieceWise(w[3]))
-    for i, linen in enumerate(w):
-        print(i)
-        ans += trie.pieceWise(linen)
-
-    return ans
+    return sum(dfs(linen) for linen in w)
 
 
 if __name__ == "__main__":
