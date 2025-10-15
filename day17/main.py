@@ -27,13 +27,12 @@ def part_one(inp):
     out = ""
 
     while ip < len(program):
-        print(reg)
         opcode = program[ip]
         operand = program[ip + 1]
 
         match opcode:
             case 0:
-                reg[0] //= (2**combo(operand, reg))
+                reg[0] //= 2 ** combo(operand, reg)
             case 1:
                 reg[1] ^= operand
             case 2:
@@ -41,16 +40,15 @@ def part_one(inp):
             case 3:
                 if reg[0] != 0:
                     ip = operand
-                    print("Jump")
                     continue
             case 4:
                 reg[1] ^= reg[2]
             case 5:
                 out += str(combo(operand, reg) % 8) + ","
             case 6:
-                reg[1] = reg[0] // (2**combo(operand, reg))
+                reg[1] = reg[0] // (2 ** combo(operand, reg))
             case 7:
-                reg[2] = reg[0] // (2**combo(operand, reg))
+                reg[2] = reg[0] // (2 ** combo(operand, reg))
             case _:
                 print("ERROR: OPCODE DOES NOT EXIST")
         ip += 2
@@ -58,11 +56,31 @@ def part_one(inp):
     return out
 
 
+def find(program, a):
+    if not program:
+        return a
+
+    for n in range(1, 8):
+        a = a << 3
+        a += n
+        b = a % 8
+        b = b ^ 3
+        c = a >> b
+        a = a >> 3
+        b = b ^ c
+        b = b ^ 5
+        if b % 8 == program[-1]:
+            ans = find(program[:-1], (a << 3) + n)
+            if ans:
+                return ans
+
+
 if __name__ == "__main__":
     data = read_file("./input.txt")
-    ANS = part_one(data)
-    print("".join(ANS.split(",")))
-    # print(data)
-    # data[0][0] = 27 
     # ANS = part_one(data)
-    # print(ANS[:-1])
+    # print("".join(ANS.split(",")))
+    ans = find(data[1], 0)
+    print(ans)
+    # datatwo = [[236581108670061, 0, 0], data[1]]
+    # twoi = part_one(datatwo)
+    # print(twoi)
