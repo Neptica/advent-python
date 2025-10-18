@@ -1,89 +1,67 @@
-import sys
-from functools import cache
 from typing import DefaultDict
 
-# Increase recursion depth
-sys.setrecursionlimit(50000)
+board = [line for line in open("./input.txt").read().splitlines()]
+path = [[-1 for _ in board[0]] for _ in board]
 
-board = open("./test.txt").read().splitlines()
 s = (0, 0)
-for i in range(len(board)):
-    pos_start = board[i].find("S")
-    if pos_start != -1:
-        s = (i, pos_start)  # in i,j / y,x
-track_length = sum([l in (".", "E") for line in board for l in line])
+for i, line in enumerate(board):
+    j = line.find("S")
+    if j != -1:
+        s = (i, j)
+        break
 
-board = [list(line) for line in board]
+stack = [(s, 0)]
+while stack:
+    (i, j), count = stack.pop()
+    if board[i][j] == "#":
+        continue
+    if not 0 < j < len(board) - 1 or not 0 < i < len(board) - 1:
+        continue
+    if path[i][j] != -1:
+        continue
 
+    path[i][j] = count
+    for nc, nr in [(i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)]:
+        stack.append(((nc, nr), count + 1))
 
-def dfs(pos):
-    path = [[float("inf") for _ in board] for _ in board]
-    stack = [(pos, 0)]
-    while stack:
-        p, count = stack.pop()
-        if not 0 <= p[0] < len(board) or not 0 <= p[1] < len(board[0]):
-            continue
-        elif board[p[0]][p[1]] == "#":
-            continue
-        if path[p[0]][p[1]] <= count:
-            continue
-        path[p[0]][p[1]] = count
-
-        for p in [
-            (p[0], p[1] + 1),
-            (p[0] + 1, p[1]),
-            (p[0], p[1] - 1),
-            (p[0] - 1, p[1]),
-        ]:
-            stack.append((p, count + 1))
-
-    # for line in path:
-    #     print(line)
-    return path
+# for line in path:
+#     print(line, sep="\t")
 
 
-path = dfs(s)
+shortcuts = DefaultDict(int)
+
+ans = 0
+visited = set()
 cheats = set()
+CHEAT = 20 + 1
+stacks = [(s, 0)]
+while stacks:
+    (i, j), count = stacks.pop()
+    if board[i][j] == "#":
+        continue
+    if not 0 < j < len(board) - 1 or not 0 < i < len(board) - 1:
+        continue
+    if (i, j) in visited:
+        continue
 
+    visited.add((i, j))
+    for sc in range(CHEAT):
+        for sr in range(CHEAT - sc):
+            for nr, nc in [(sc, sr), (-sc, sr), (sc, -sr), (-sc, -sr)]:
+                if not 0 < nc + i < len(path) - 1 or not 0 < nr + j < len(path[0]) - 1:
+                    continue
+                if path[nc + i][nr + j] == -1:
+                    continue
 
-@cache
-def twoi(p, psec, cheat_count, last, last_legal):
-    shortcuts = DefaultDict(int)
-    count = 0
-    stack = [(p, psec, cheat_count, last, last_legal)]
-    while stack:
-        p, psec, cheat, last, last_legal = stack.pop()
-        if (
-            not 0 < p[0] < len(board) - 1
-            or not 0 < p[1] < len(board[0]) - 1
-            or path[p[0]][p[1]] < psec
-        ):
-            continue
+                time_saved = path[nc + i][nr + j] - path[i][j] - sc - sr
+                if time_saved >= 100 and ((nc + i, nr + j), (i, j)) not in cheats:
+                    cheats.add(((nc + i, nr + j), (i, j)))
+                    shortcuts[time_saved] += 1
+                    ans += 1
 
-        if board[p[0]][p[1]] == "#":
-            cheat -= 1
-            if cheat == 0:  # or last_legal in cheatsStart:
-                continue
-        else:
-            # check if we just got out of a cheat
-            if last != last_legal:
-                # check if this cheat has been done before or has no advantage
-                if psec < path[p[0]][p[1]] and (last_legal, p) not in cheats:
-                    count += 1
-                    cheats.add((last_legal, p))
-                    shortcuts[path[p[0]][p[1]] - psec] += 1
-                continue
-            last_legal = p
+    for nc, nr in [(i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)]:
+        stacks.append(((nc, nr), count + 1))
 
-        stack.append(((p[0] - 1, p[1]), psec + 1, cheat, p, last_legal))
-        stack.append(((p[0], p[1] - 1), psec + 1, cheat, p, last_legal))
-        stack.append(((p[0] + 1, p[1]), psec + 1, cheat, p, last_legal))
-        stack.append(((p[0], p[1] + 1), psec + 1, cheat, p, last_legal))
-
-    for [key, pair] in shortcuts.items():
-        print(pair, ": ", key)
-    return count
-
-
-print(twoi(s, 0, 2, s, s))
-# print(twoi(s, 0, 2, s, s))
+for [length, count] in shortcuts.items():
+    print(count, ": ", length)
+print(ans)
