@@ -68,5 +68,6 @@ if __name__ == "__main__":
             if c in (".", "E"):
                 distance += 1
     print(begin, finish, distance)
-    ans = dfs(layout, set(), set(), begin, 0, distance, 20, ((), ""))
-    print(ans)
+    count = set()
+    ans = dfs(layout, set(), count, begin, 0, distance, 2, ((), ""))
+    print(ans, len(count))

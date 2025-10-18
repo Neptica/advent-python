@@ -42,40 +42,66 @@ def dfs(m, visited, current_track, p, direction, score, best):
     current_track[p[0]][p[1]] = min(current_track[p[0]][p[1]], score)
     visited[p[0]][p[1]] = min(visited[p[0]][p[1]], score)
 
-    r1, r2, r3, r4 = (
-        float("infinity"),
-        float("infinity"),
-        float("infinity"),
-        float("infinity"),
-    )
-
+    results = [float("inf")]
     if m[p[0] - 1][p[1]] != "#" and direction != 2:
         penalty = weight if direction != 0 else 0
-        r1 = dfs(
-            m, visited, current_track, (p[0] - 1, p[1]), 0, 1 + penalty + score, best
+        results.append(
+            dfs(
+                m,
+                visited,
+                current_track,
+                (p[0] - 1, p[1]),
+                0,
+                1 + penalty + score,
+                best,
+            )
         )
 
     if m[p[0]][p[1] + 1] != "#" and direction != 3:
         penalty = weight if direction != 1 else 0
-        r2 = dfs(
-            m, visited, current_track, (p[0], p[1] + 1), 1, 1 + penalty + score, best
+        results.append(
+            dfs(
+                m,
+                visited,
+                current_track,
+                (p[0], p[1] + 1),
+                1,
+                1 + penalty + score,
+                best,
+            )
         )
 
     if m[p[0] + 1][p[1]] != "#" and direction != 0:
         penalty = weight if direction != 2 else 0
-        r3 = dfs(
-            m, visited, current_track, (p[0] + 1, p[1]), 2, 1 + penalty + score, best
+        results.append(
+            dfs(
+                m,
+                visited,
+                current_track,
+                (p[0] + 1, p[1]),
+                2,
+                1 + penalty + score,
+                best,
+            )
         )
 
     if m[p[0]][p[1] - 1] != "#" and direction != 1:
         penalty = weight if direction != 3 else 0
-        r4 = dfs(
-            m, visited, current_track, (p[0], p[1] - 1), 3, 1 + penalty + score, best
+        results.append(
+            dfs(
+                m,
+                visited,
+                current_track,
+                (p[0], p[1] - 1),
+                3,
+                1 + penalty + score,
+                best,
+            )
         )
 
     current_track[p[0]][p[1]] = prev
 
-    return min(r1, r2, r3, r4)
+    return min(results)
 
 
 if __name__ == "__main__":

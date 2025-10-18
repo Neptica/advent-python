@@ -18,15 +18,15 @@ def dfs(pad, p, visited, button, score):
         return "XXXXXXXXXXX"
 
     visited[p] = score
-    s = ["XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX"]
+    s = []
     if p[0] - 1 > -1 and pad[p[0] - 1][p[1]] != "":
-        s[0] = "^" + dfs(pad, (p[0] - 1, p[1]), visited, button, score + 1)
+        s.append("^" + dfs(pad, (p[0] - 1, p[1]), visited, button, score + 1))
     if p[1] + 1 < len(pad[0]) and pad[p[0]][p[1] + 1] != "":
-        s[1] = ">" + dfs(pad, (p[0], p[1] + 1), visited, button, score + 1)
+        s.append(">" + dfs(pad, (p[0], p[1] + 1), visited, button, score + 1))
     if p[0] + 1 < len(pad) and pad[p[0] + 1][p[1]] != "":
-        s[2] = "v" + dfs(pad, (p[0] + 1, p[1]), visited, button, score + 1)
+        s.append("v" + dfs(pad, (p[0] + 1, p[1]), visited, button, score + 1))
     if p[1] - 1 > -1 and pad[p[0]][p[1] - 1] != "":
-        s[3] = "<" + dfs(pad, (p[0], p[1] - 1), visited, button, score + 1)
+        s.append("<" + dfs(pad, (p[0], p[1] - 1), visited, button, score + 1))
 
     return min(s, key=len)
 
@@ -91,7 +91,6 @@ def part_one(codes):
         KeypadController(),
         ArrowController(),
         ArrowController(),
-        # ArrowController(), this was too many
     ]
     ans = 0
     for code in codes:
